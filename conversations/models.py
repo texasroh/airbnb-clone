@@ -5,7 +5,9 @@ from core import models as core_models
 class Conversation(core_models.TimeStampModel):
     """Conversation Model Definition"""
 
-    participants = models.ManyToManyField("users.User", blank=True)
+    participants = models.ManyToManyField(
+        "users.User", related_name="conversations", blank=True
+    )
 
     def __str__(self):
         return str(self.created)
