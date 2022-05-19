@@ -8,3 +8,5 @@ class ReviewAdmin(admin.ModelAdmin):
 
     class Meta:
         pass
+
+    list_display = ("__str__", "rating_average")
