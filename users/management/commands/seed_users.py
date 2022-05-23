@@ -1,62 +1,29 @@
 from django.core.management.base import BaseCommand
-from rooms.models import Amenity
+from django_seed import Seed
+from users.models import User
 
 
 class Command(BaseCommand):
-    help = "Thish command creates amenities"
+    help = "Thish command creates many users"
 
-    # def add_arguments(self, parser):
-    #     parser.add_argument(
-    #         "--times",
-    #         help="How many times do you want me to tell you that I love you?",
-    #     )
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--number",
+            default=2,
+            type=int,
+            help="How many users do you want to create?",
+        )
 
     def handle(self, *args, **kwargs):
-        amenities = [
-            "Air conditioning",
-            "Alarm Clock",
-            "Balcony",
-            "Bathroom",
-            "Bathtub",
-            "Bed Linen",
-            "Boating",
-            "Cable TV",
-            "Carbon monoxide detectors",
-            "Chairs",
-            "Children Area",
-            "Coffee Maker in Room",
-            "Cooking hob",
-            "Cookware & Kitchen Utensils",
-            "Dishwasher",
-            "Double bed",
-            "En suite bathroom",
-            "Free Parking",
-            "Free Wireless Internet",
-            "Freezer",
-            "Fridge / Freezer",
-            "Golf",
-            "Hair Dryer",
-            "Heating",
-            "Hot tub",
-            "Indoor Pool",
-            "Ironing Board",
-            "Microwave",
-            "Outdoor Pool",
-            "Outdoor Tennis",
-            "Oven",
-            "Queen size bed",
-            "Restaurant",
-            "Shopping Mall",
-            "Shower",
-            "Smoke detectors",
-            "Sofa",
-            "Stereo",
-            "Swimming pool",
-            "Toilet",
-            "Towels",
-            "TV",
-        ]
-        for a in amenities:
-            Amenity.objects.create(name=a)
-
-        self.stdout.write(self.style.SUCCESS("Amenities created!"))
+        number = kwargs.get("number")
+        seeder = Seed.seeder()
+        seeder.add_entity(
+            User,
+            number,
+            {
+                "is_staff": False,
+                "is_superuser": False,
+            },
+        )
+        seeder.execute()
+        self.stdout.write(self.style.SUCCESS(f"{number} Users created!"))
