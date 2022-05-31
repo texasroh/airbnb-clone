@@ -9,6 +9,8 @@ class LoginView(View):
     """LoginView Definitions"""
 
     def get(self, request):
+        if request.user.is_authenticated:
+            return redirect(reverse("core:home"))
         form = forms.LoginForm(initial={"email": "test@test.com"})
 
         return render(request, "users/login.html", {"form": form})
@@ -30,3 +32,8 @@ class LoginView(View):
 #         pass
 #     elif request.method == "POST":
 #         pass
+
+
+def log_out(request):
+    logout(request)
+    return redirect(reverse("core:home"))
