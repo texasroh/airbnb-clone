@@ -1,3 +1,5 @@
+import os
+import requests
 from django.views import View
 from django.views.generic import FormView
 from django.urls import reverse_lazy
@@ -88,5 +90,59 @@ def complete_verification(request, key):
     except models.User.DoesNotExist:
         # to do: add error message
         pass
+
+    return redirect(reverse("core:home"))
+
+
+def github_login(request):
+    client_id = os.environ.get("GH_ID")
+    redirect_uri = "http://127.0.0.1:8000/users/login/github/callback"
+    return redirect(
+        f"https://github.com/login/oauth/authorize?client_id={client_id}&redirect_uri={redirect_uri}&scope=read:user"
+    )
+
+
+def github_callback(request):
+    client_id = os.environ.get("GH_ID")
+    client_secret = os.environ.get("GH_SECRET")
+    code = request.GET.get("code", None)
+    if code:
+        result = requests.post(
+            "https://github.com/login/oauth/access_token",
+            headers={"Accept": "application/json"},
+            json={
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "code": code,
+            },
+        )
+        result_json = result.json()
+        error = result_json.get("error", None)
+        if error:
+            return redirect(reverse("users:login"))
+
+        access_token = result_json.get("access_token")
+        profile_request = requests.get(
+            "GET https://api.github.com/user",
+            headers={
+                "Authorization": f"token {access_token}",
+                "Accept": "application/json",
+            },
+        )
+        profile_json = profile_request.json()
+        username = profile_json.get("login")
+        if not username:
+            return redirect(reverse("users:login"))
+
+        name = profile_json.get("name")
+        email = profile_json.get("email")
+        bio = profile_json.get("bio")
+        user = models.User.objects.get(email=email)
+        if user:
+            return redirect(reverse("users:login"))
+        user = models.User.objects.create(
+            username=email, first_name=name, bio=bio, email=email
+        )
+        login(request, user)
 
     return redirect(reverse("core:home"))
