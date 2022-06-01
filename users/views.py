@@ -72,5 +72,7 @@ class SignUpView(FormView):
         email = form.cleaned_data.get("email")
         password = form.cleaned_data.get("password")
         user = authenticate(self.request, username=email, password=password)
-        login(self.request, user)
+        if user:
+            login(self.request, user)
+        user.verify.email()
         return super().form_valid(form)
