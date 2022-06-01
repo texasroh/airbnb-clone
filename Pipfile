@@ -11,6 +11,7 @@ tzdata = "*"
 django-seed = "*"
 psycopg2-binary = "*"
 python-dotenv = "*"
+requests = "*"
 
 [dev-packages]
 flake8 = "*"
