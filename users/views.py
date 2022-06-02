@@ -5,6 +5,9 @@ from django.views.generic import FormView
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, reverse
 from django.contrib.auth import authenticate, login, logout
+from django.core.files.base import ContentFile
+
+# from django.contrib.auth.forms import UserCreationForm
 from . import forms, models
 
 
@@ -62,6 +65,7 @@ def log_out(request):
 class SignUpView(FormView):
     template_name = "users/signup.html"
     form_class = forms.SignUpForm
+    # form_class = UserCreationForm
     success_url = reverse_lazy("core:home")
     initial = {
         "first_name": "June",
@@ -108,7 +112,6 @@ class GithubException(Exception):
 
 def github_callback(request):
     try:
-
         client_id = os.environ.get("GH_ID")
         client_secret = os.environ.get("GH_SECRET")
         code = request.GET.get("code", None)
@@ -137,25 +140,26 @@ def github_callback(request):
             },
         )
         profile_json = profile_request.json()
-        print(profile_json)
-        username = profile_json.get("login")
-        if not username:
+        id = f'{models.User.LOGIN_GITHUB}_{profile_json.get("id")}'
+        if not id:
             raise GithubException()
 
         name = profile_json.get("name")
-        email = profile_json.get("email")
+        email = profile_json.get("email", "")
+        email = email if email else ""
         bio = profile_json.get("bio")
         try:
-            user = models.User.objects.get(email=email)
+            user = models.User.objects.get(username=id)
             if user.login_method != models.User.LOGIN_GITHUB:
                 raise GithubException()
         except models.User.DoesNotExist:
             user = models.User.objects.create(
-                email=email if email else username,
+                email=email,
                 first_name=name,
-                username=email if email else username,
+                username=id,
                 bio=bio,
                 login_method=models.User.LOGIN_GITHUB,
+                email_verified=True,
             )
             user.set_unusable_password()
             user.save()
@@ -166,3 +170,81 @@ def github_callback(request):
     except GithubException:
         # send error message
         return redirect(reverse("user:login"))
+
+
+def kakao_login(request):
+    REST_API_KEY = os.environ.get("KAKAO_REST_API_KEY")
+    REDIRECT_URI = "http://127.0.0.1:8000/users/login/kakao/callback"
+    return redirect(
+        f"https://kauth.kakao.com/oauth/authorize?client_id={REST_API_KEY}&redirect_uri={REDIRECT_URI}&response_type=code"
+    )
+
+
+class KakaoException(Exception):
+    pass
+
+
+def kakao_callback(request):
+    try:
+        code = request.GET.get("code")
+        client_id = os.environ.get("KAKAO_REST_API_KEY")
+        redirect_uri = "http://127.0.0.1:8000/users/login/kakao/callback"
+        token_request = requests.post(
+            # f"https://kauth.kakao.com/oauth/token",
+            f"https://kauth.kakao.com/oauth/token?grant_type=authorization_code&client_id={client_id}&redirect_uri={redirect_uri}&code={code}",
+            headers={
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            # json={
+            #     "grant_type": "authorization_code",
+            #     "client_id": client_id,
+            #     "redirect_uri": redirect_uri,
+            #     "code": code,
+            # },
+        )
+        token_json = token_request.json()
+
+        error = token_json.get("error")
+        if error:
+            raise KakaoException()
+
+        access_token = token_json.get("access_token")
+
+        profile_request = requests.get(
+            "https://kapi.kakao.com/v2/user/me",
+            headers={
+                "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+                "Authorization": f"Bearer ${access_token}",
+            },
+        )
+
+        profile_json = profile_request.json()
+        id = f'{models.User.LOGIN_KAKAO}_{profile_json.get("id")}'
+        email = profile_json.get("kakao_account").get("email", "")
+        properties = profile_json.get("properties")
+        nickname = properties.get("nickname")
+        profile_image = properties.get("profile_image")
+
+        try:
+            user = models.User.objects.get(username=id)
+            if user.login_method != models.User.LOGIN_KAKAO:
+                raise KakaoException()
+        except models.User.DoesNotExist:
+            user = models.User.objects.create(
+                username=id,
+                email=email,
+                first_name=nickname,
+                login_method=models.User.LOGIN_KAKAO,
+                email_verified=True,
+            )
+            user.set_unusable_password()
+            user.save()
+            if profile_image:
+                photo_request = requests.get(profile_image)
+                user.avatar.save(f"{id}-avatar.jpg", ContentFile(photo_request.content))
+
+        login(request, user)
+        return redirect(reverse("core:home"))
+
+    except KakaoException:
+        return redirect(reverse("users:login"))
