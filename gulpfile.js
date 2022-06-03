@@ -2,9 +2,9 @@ const gulp = require('gulp');
 
 const css = () => {
     const postCSS = require('gulp-postcss');
-    const sass = require('gulp-sass')(require('sass'));
+    const sass = require('gulp-sass')(require('node-sass'));
     const minify = require('gulp-csso');
-    sass.compiler = require('node-sass');
+    // sass.compiler = require('node-sass');
     return gulp.src('assets/scss/styles.scss', { allowEmpty: true })
         .pipe(sass().on('error', sass.logError))
         .pipe(postCSS([require('tailwindcss'), require('autoprefixer')]))
