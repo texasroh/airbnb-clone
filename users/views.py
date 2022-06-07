@@ -174,7 +174,7 @@ def github_callback(request):
 
         login(request, user)
         messages.success(request, f"Welcome back {user.first_name}")
-        return redirect("core:home")
+        return redirect(reverse("core:home"))
 
     except GithubException as e:
         messages.error(request, e)
