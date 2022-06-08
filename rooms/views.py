@@ -310,3 +310,17 @@ class AddPhotoView(user_mixins.LoggedInOnlyView, SuccessMessageMixin, FormView):
 
     def get_success_url(self) -> str:
         return reverse("rooms:photos", kwargs={"pk": self.kwargs.get("pk")})
+
+
+class CreateRoomView(user_mixins.LoggedInOnlyView, FormView):
+    form_class = forms.CreateRoomForm
+    template_name = "rooms/room_create.html"
+
+    def form_valid(self, form):
+        room = form.save()
+        room.host = self.request.user
+        room.save()
+        form.save_m2m()
+        messages.success(self.request, "Room Created")
+        # return super().form_valid(form)
+        return redirect(reverse("rooms:detail", kwargs={"pk": room.pk}))

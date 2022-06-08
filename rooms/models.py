@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 from django.db import models
 from django.urls import reverse
 from django_countries.fields import CountryField
@@ -107,8 +108,11 @@ class Room(core_models.TimeStampModel):
         return round(all_ratings / len(all_reviews), 2)
 
     def first_photo(self):
-        # (photo,) = self.photos.all()[:1]
-        photo = self.photos.all()[0]
+        try:
+            # (photo,) = self.photos.all()[:1]
+            photo = self.photos.all()[0]
+        except (ValueError, IndexError):
+            return None
         return photo.file.url
 
     def get_next_four_photos(self):
