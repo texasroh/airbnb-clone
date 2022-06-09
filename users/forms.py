@@ -1,4 +1,3 @@
-from tkinter import E
 from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import UserCreationForm
