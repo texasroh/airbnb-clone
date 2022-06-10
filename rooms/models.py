@@ -1,4 +1,4 @@
-from multiprocessing.sharedctypes import Value
+from django.utils import timezone
 from django.db import models
 from django.urls import reverse
 from django_countries.fields import CountryField
@@ -121,6 +121,14 @@ class Room(core_models.TimeStampModel):
         return photos
 
     def get_calendars(self):
-        this_month = Calendar(2022, 6)
-        next_month = Calendar(2022, 7)
-        return [this_month, next_month]
+        now = timezone.now()
+        this_year = now.year
+        this_month = now.month
+        next_year = this_year
+        next_month = this_month + 1
+        if this_month == 12:
+            next_month = 1
+            next_year = this_year + 1
+        this_month_cal = Calendar(this_year, this_month)
+        next_month_cal = Calendar(next_year, next_month)
+        return [this_month_cal, next_month_cal]
