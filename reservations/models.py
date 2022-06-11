@@ -53,7 +53,8 @@ class Reservation(core_models.TimeStampModel):
     def is_finished(self):
         now = timezone.now().date()
         is_finished = now > self.check_out
-        BookedDay.objects.filter(reservation=self).delete()
+        if is_finished:
+            BookedDay.objects.filter(reservation=self).delete()
         return is_finished
 
     is_finished.boolean = True
@@ -68,8 +69,11 @@ class Reservation(core_models.TimeStampModel):
                 reservation__room=self.room, day__range=(start, end)
             ).exists()
             if not existing_book_day:
+                print("here")
                 super().save(*args, **kwargs)
+                print("difference", difference)
                 for i in range(difference.days + 1):
+                    print(i)
                     day = start + datetime.timedelta(days=i)
                     BookedDay.objects.create(day=day, reservation=self)
                 return
