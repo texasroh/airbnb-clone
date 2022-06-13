@@ -34,7 +34,7 @@ class Message(core_models.TimeStampModel):
     user = models.ForeignKey(
         "users.User", related_name="messages", on_delete=models.CASCADE
     )
-    conversations = models.ForeignKey(
+    conversation = models.ForeignKey(
         Conversation, related_name="messages", on_delete=models.CASCADE
     )
 
