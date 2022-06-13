@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-12 03:23-0400\n"
+"POT-Creation-Date: 2022-06-13 00:31-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,3 +25,48 @@ msgstr "도시명으로 검색"
 #: .\templates\partials\footer.html:5
 msgid "All rights reserved."
 msgstr "모든 권리 보호됨."
+
+#: .\templates\rooms\room_list.html:20
+#, python-format
+msgid "Page %(current_page)s of %(total_page)s"
+msgstr "페이지 %(current_page)s / 전체 %(total_page)s"
+
+#: .\users\mixins.py:13
+msgid "Can't go there"
+msgstr "이동할 수 없습니다"
+
+#: .\users\models.py:21
+msgid "Male"
+msgstr "남자"
+
+#: .\users\models.py:22
+msgid "Female"
+msgstr "여자"
+
+#: .\users\models.py:23
+msgid "Other"
+msgstr "기타"
+
+#: .\users\models.py:30
+msgid "English"
+msgstr "영어"
+
+#: .\users\models.py:31
+msgid "Korean"
+msgstr "한국어"
+
+#: .\users\models.py:54
+msgid "gender"
+msgstr "성별"
+
+#: .\users\models.py:56
+msgid "bio"
+msgstr "특성"
+
+#: .\users\models.py:59
+msgid "language"
+msgstr "언어"
+
+#: .\users\models.py:85
+msgid "Verify Jbnb Account"
+msgstr "Jbnb 계정 인증"
