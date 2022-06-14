@@ -12,6 +12,8 @@ django-seed = "*"
 psycopg2-binary = "*"
 python-dotenv = "*"
 requests = "*"
+django-storages = "*"
+boto3 = "*"
 
 [dev-packages]
 flake8 = "*"
